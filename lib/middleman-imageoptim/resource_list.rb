@@ -25,7 +25,7 @@ module Middleman
             Middleman::Sitemap::Resource.new(
               app.sitemap,
               resource.destination_path,
-              File.join(app.build_dir, resource.destination_path)
+              File.join(app.config.build_dir, resource.destination_path)
             )
           else
             resource
@@ -34,9 +34,10 @@ module Middleman
       end
 
       def manifest_resource
+        build_dir = app.config.build_dir
         resource_args = [app.sitemap, Manifest::MANIFEST_FILENAME]
-        if File.exist?(File.join(app.build_dir, Manifest::MANIFEST_FILENAME))
-          resource_args << File.join(app.build_dir, Manifest::MANIFEST_FILENAME)
+        if File.exist?(File.join(build_dir, Manifest::MANIFEST_FILENAME))
+          resource_args << File.join(build_dir, Manifest::MANIFEST_FILENAME)
         end
         Middleman::Imageoptim::ManifestResource.new(*resource_args)
       end
@@ -65,7 +66,7 @@ module Middleman
       end
 
       def resource_build_path(resource)
-        File.join(app.build_dir, resource.destination_path)
+        File.join(app.config.build_dir, resource.destination_path)
       end
     end
   end
