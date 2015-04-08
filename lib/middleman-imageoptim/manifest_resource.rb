@@ -26,7 +26,7 @@ module Middleman
       end
 
       def metadata
-        @local_metadata.dup
+        @metadata.dup
       end
 
       private
@@ -35,7 +35,7 @@ module Middleman
         if @source_file.nil?
           YAML.dump({})
         else
-          File.read(@source_file)
+          File.read(@source_file.full_path)
         end
       end
     end

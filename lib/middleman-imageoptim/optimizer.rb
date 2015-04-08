@@ -2,6 +2,7 @@ module Middleman
   module Imageoptim
     require 'image_optim'
     require 'fileutils'
+    require 'pathname'
 
     # Optimizer class that accepts an options object and processes files and
     # passes them off to image_optim to be processed
@@ -26,7 +27,7 @@ module Middleman
           process_image(source, destination, modes.fetch(source.to_s))
         end
         update_manifest
-        say_status 'Total savings: %{data}', data: Utils.format_size(byte_savings)
+        say_status "Total savings: #{Utils.format_size(byte_savings)}"
       end
 
       private
@@ -34,16 +35,18 @@ module Middleman
       def update_manifest
         return unless options.manifest
         manifest.build_and_write(optimizable_images)
-        say_status '%{manifest_path} updated', manifest_path: manifest.path
+        manifest_rel_pth = Pathname.new(manifest.path).relative_path_from(
+          Pathname.new(app.root)).to_s
+        say_status "#{manifest_rel_pth} updated"
       end
 
       def process_image(source, destination = nil, mode = nil)
         if destination
           update_bytes_saved(source.size - destination.size)
-          say_status '%{source} (%{percent_change} / %{size_change} %{size_change_type})', Utils.file_size_stats(source, destination)
+          say_status '%{source} (%{percent_change} / %{size_change} %{size_change_type})' % Utils.file_size_stats(source, destination)
           FileUtils.move(destination, source)
         else
-          say_status '[skipped] %{source} not updated', source: source
+          say_status "[skipped] #{source} not updated"
         end
       ensure
         ensure_file_mode(mode, source) unless mode.nil?
@@ -72,11 +75,11 @@ module Middleman
       end
 
       def build_files
-        ::Middleman::Util.all_files_under(app.build_dir)
+        ::Middleman::Util.all_files_under(app.config.build_dir)
       end
 
-      def say_status(status, interpolations = {})
-        builder.say_status(:imageoptim, status % interpolations) if builder
+      def say_status(status)
+        builder.trigger(:imageoptim, nil, status) if builder
       end
 
       def optimizer
@@ -98,7 +101,7 @@ module Middleman
       def ensure_file_mode(mode, file)
         return if mode == get_file_mode(file)
         FileUtils.chmod(mode.to_i(8), file)
-        say_status 'fixed file mode on %{file} file to match source', file: file
+        say_status "fixed file mode on #{file} file to match source"
       end
     end
   end
