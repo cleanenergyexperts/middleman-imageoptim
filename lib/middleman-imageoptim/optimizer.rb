@@ -78,8 +78,8 @@ module Middleman
         ::Middleman::Util.all_files_under(app.config.build_dir)
       end
 
-      def say_status(status)
-        builder.trigger(:imageoptim, nil, status) if builder
+      def say_status(status, target = '')
+        builder.trigger(:imageoptim, target, status) if builder
       end
 
       def optimizer
