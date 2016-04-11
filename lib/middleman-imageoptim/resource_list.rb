@@ -61,7 +61,11 @@ module Middleman
       end
 
       def resource_current?(resource)
-        File.mtime(resource_build_path(resource)) > File.mtime(resource.source_file.full_path)
+        if resource.source_file.respond_to?(:full_path) then
+          File.mtime(resource_build_path(resource)) > File.mtime(resource.source_file.full_path)
+        else
+          File.mtime(resource_build_path(resource)) > File.mtime(resource.source_file)
+        end
       end
 
       def resource_build_path(resource)
